@@ -18,9 +18,9 @@ setup to view or edit a database.
 ## CREATING A NEW DATABASE
 >db_variable = DKBase('file_name.txt')
 
-db_variable.create(
+>db_variable.create(
 	fields={'IDfield': IDlength, 'field1': length2, ...}
-	)<
+	)
 
 
 _Create a variable to refer to a database (db_variable).
@@ -35,7 +35,7 @@ field length must be an integer._
 ## OPENING AN EXISTING DATABASE
 >db_variable = DKBase('file_name.txt')
 
-db_variable.open()<
+>db_variable.open()<
 
 
 
