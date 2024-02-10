@@ -18,13 +18,12 @@ When setting up a database you can either setup to create a new database or
 setup to view or edit a database.
 
 ## Creating a new database
-----------------------------------------------------------------
 db_variable = DKBase('file_name.txt')
 
 db_variable.create(
 	fields={'IDfield': IDlength, 'field1': length2, ...}
 	)
-----------------------------------------------------------------
+
 
 Create a variable to refer to a database (db_variable).
 Use .create() function to setup the fields and field lengths of the database.
@@ -36,10 +35,10 @@ field length must be an integer.
 
 
 ## Opening an existing database
-----------------------------------------------------------------
 db_variable = DKBase('file_name.txt')
 
 db_variable.open()
-----------------------------------------------------------------
+
+
 
 Before making changes to a database e.g. inserting/deleting a record, you must use the .open() function.
