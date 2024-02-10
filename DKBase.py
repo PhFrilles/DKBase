@@ -1,5 +1,7 @@
 # DeeKie Base Manager (Data base manager)
 # - Started 28 October 2023
+#-------------------------------------------
+# Last changes: 10/02/2024
 # -------------------------------------------
 import os
 
