@@ -1,27 +1,22 @@
->> DKBase - txt file database manager README <<
+> DKBase - txt file database manager README <<
 Last updated: 09/02/2024
 
----------- OVERVIEW ----------
-
+> OVERVIEW 
 DKBase is a database manager revolving around text files.
 It can be used to handle multiple databases and is designed 
 to be used in python programs.
 
-------- CURRENT FEATURES: ------------
+> CURRENT FEATURES
+-Create a new database
+-Add records
+-Delete a record
 
-> Create a new database
-> Add records
-> Delete a record
-
-------- Setting up ---------
-
+> SETTING UP
 Before making any changes to a database, you must correctly setup a database.
 When setting up a database you can either setup to create a new database or
 setup to view or edit a database.
 
->> Creating a new database
-
-
+> CREATING A NEW DATABASE
 #
 db_variable = DKBase('file_name.txt')
 
@@ -29,7 +24,6 @@ db_variable.create(
 	fields={'IDfield': IDlength, 'field1': length2, ...}
 	)
 #
-
 
 Create a variable to refer to a database (db_variable).
 Use .create() function to setup the fields and field lengths of the database.
@@ -40,14 +34,11 @@ its field length.
 field length must be an integer.
 
 
->> Opening an existing database
-
-
+> OPENING AN EXISTING DATABASE
 #
 db_variable = DKBase('file_name.txt')
 
 db_variable.open()
 #
-
 
 Before making changes to a database, you must use the .open() function.
