@@ -1,5 +1,7 @@
 # DeeKie Base Manager (Data base manager)
 # - Started 28 October 2023
+#-------------------------------------------
+# Last changes: 10/02/2024
 # -------------------------------------------
 import os
 
@@ -16,6 +18,37 @@ class DKBase:
                 pass
         except FileNotFoundError:
             self.file_exists = False
+
+    # ---------------------------------------------------- # USED WITHIN OTHER FUNCTIONS
+    def find_index_positions(self, first_line):
+
+        index_counter = -1
+        character_count = 0
+        positions = []  # Function to find the index positions of '|'
+
+        for char in first_line:
+            index_counter += 1
+            if char == '|':
+                character_count += 1
+                positions.append(index_counter)
+
+        return positions
+
+    # ------------------------------------------------------- # USED WITHIN OTHER FUNCTIONS
+    def get_field_lengths(self, index_positions_list):
+        lengths_list = []
+        index_counter = -1
+
+        for num in index_positions_list:
+            index_counter += 1
+
+            if index_counter == 0:
+                lengths_list.append(num)  # Gets first field length
+            else:
+                length = num - index_positions_list[index_counter - 1]  # Gets remaining field lengths
+                lengths_list.append(length - 1)
+
+        return lengths_list
 
     # --------------------------------------------------- # USE THIS FUNCTION ONLY TO READ AND GET DATA
     def open(self):
@@ -65,36 +98,6 @@ class DKBase:
     # ------------------------------------------------------
     def add_records(self, *records):  # records MUST BE A TUPLE
 
-        def find_index_positions():
-            index_counter = -1
-            character_count = 0
-            positions = []                                 # Function to find the index positions of '|'
-
-            for char in first_line:
-                index_counter += 1
-                if char == '|':
-                    character_count += 1
-                    positions.append(index_counter)
-
-            return positions
-
-        def get_field_lengths():
-            lengths_list = []
-            index_counter = -1
-
-            for num in index_positions_list:
-                index_counter += 1
-
-                if index_counter == 0:
-                    lengths_list.append(num)  # Gets first field length
-                else:
-                    length = num - index_positions_list[index_counter - 1]  # Gets remaining field lengths
-                    lengths_list.append(length - 1)
-
-            return lengths_list
-
-        first_line = ""
-
         if not isinstance(records, tuple):  # Error checking
             raise Exception("ERROR: invalid records argument given. Must be a tuple.")  # Checks if records is a tuple.
 
@@ -112,8 +115,8 @@ class DKBase:
             if len(record) != number_of_fields:  # Checks if record has correct amount of fields.
                 raise Exception("ERROR: one or more records have an invalid length.")
 
-        index_positions_list = find_index_positions()
-        field_lengths_list = get_field_lengths()
+        index_positions_list = self.find_index_positions(first_line)
+        field_lengths_list = self.get_field_lengths(index_positions_list)
 
         for record in records:
             index_counter = -1  # Error checking
@@ -139,18 +142,6 @@ class DKBase:
 
     def del_records(self, conditions):  # conditions MUST BE A DICTIONARY
 
-        def find_index_positions():
-            index_counter = -1
-            character_count = 0
-            positions = []                               # Function to find the index positions of '|'
-
-            for char in headings_row:
-                index_counter += 1
-                if char == '|':
-                    character_count += 1
-                    positions.append(index_counter)
-
-            return positions
 
         condition_fields = list(conditions)
         #print(condition_fields)
@@ -167,7 +158,7 @@ class DKBase:
                 raise Exception("ERROR: Fields given do not exist in the database.")     # Checks if fields exist in DB
 
         index_positions = [0]
-        for pos in find_index_positions():    # Gets list of index positions of '|', inserting 0 at the start.
+        for pos in self.find_index_positions(headings_row):    # Gets list of index positions of '|', inserting 0 at the start.
             index_positions.append(pos)
 
         field_counter = -1
@@ -326,8 +317,8 @@ class DKBase:
 database = DKBase('bookings - Copy.txt')
 database.open()
 
-database.view(
-    {'Seating': 'Outdoor'}
+database.del_records(
+    {'Name': 'Mia'}
 )
 
 # TESTS --------------------------------
