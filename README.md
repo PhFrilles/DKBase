@@ -8,9 +8,7 @@ to be used in python programs.
 
 ## CURRENT FEATURES:
 
-Create a new database
-Add records
-Delete a record
+Create a new database, Add records, Delete records
 
 ## SETTING UP
 Before making any changes to a database, you must correctly setup a database.
@@ -18,11 +16,11 @@ When setting up a database you can either setup to create a new database or
 setup to view or edit a database.
 
 ## CREATING A NEW DATABASE
-db_variable = DKBase('file_name.txt')
+>db_variable = DKBase('file_name.txt')
 
 db_variable.create(
 	fields={'IDfield': IDlength, 'field1': length2, ...}
-	)
+	)<
 
 
 _Create a variable to refer to a database (db_variable).
@@ -35,9 +33,9 @@ field length must be an integer._
 
 
 ## OPENING AN EXISTING DATABASE
-db_variable = DKBase('file_name.txt')
+>db_variable = DKBase('file_name.txt')
 
-db_variable.open()
+db_variable.open()<
 
 
 
