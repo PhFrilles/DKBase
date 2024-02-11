@@ -1,5 +1,5 @@
 # DKBase - txt file database manager README <<
-### Last updated: 09/02/2024
+### Last updated: 11/02/2024
 
 ## OVERVIEW 
 DKBase is a database manager revolving around text files.
