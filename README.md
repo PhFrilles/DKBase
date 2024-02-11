@@ -8,7 +8,7 @@ to be used in python programs.
 
 ## CURRENT FEATURES:
 
-Create a new database, Add records, Delete records
+Create a new database, Add records, Delete records, Selecting data
 
 ## SETTING UP
 Before making any changes to a database, you must correctly setup a database.
