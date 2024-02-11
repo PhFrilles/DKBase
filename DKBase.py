@@ -1,7 +1,5 @@
 # DeeKie Base Manager (Data base manager)
 # - Started 28 October 2023
-#-------------------------------------------
-# Last changes: 10/02/2024
 # -------------------------------------------
 import os
 
@@ -223,41 +221,60 @@ class DKBase:
 
 
 
+
+
+
+
     # ------------------------------------------------------------------------
-    def view(self, conditions):
-        def find_index_positions():
-            index_counter = -1
-            character_count = 0
-            positions = []  # Function to find the index positions of '|'
-
-            for char in headings_row:
-                index_counter += 1
-                if char == '|':
-                    character_count += 1
-                    positions.append(index_counter)
-
-            return positions
-
-        condition_fields = list(conditions)
-        # print(condition_fields)
-
-        if not isinstance(conditions, dict):  # Error checking
-            raise Exception("ERROR: invalid conditions argument given. Must be a dictionary.")  # Checks if its a dict
+    def get(self, fields, conditions=None):
+        headings_row = ""
+        select_all = False
 
         with open(self.file_name, 'r') as file:  # Gets headings row of DB for format checks e.g. fields given.
             file_lines = file.readlines()
             headings_row = file_lines[0]
 
-        for field in condition_fields:
-            if field not in headings_row:  # Error checking
-                raise Exception("ERROR: Fields given do not exist in the database.")  # Checks if fields exist in DB
 
+        # ERROR CHECKING - fields - MUST BE A TUPLE, EVEN A SINGLE ITEM TUPLE
+        if not isinstance(fields, tuple):
+            raise Exception("ERROR: Given fields must be a dictionary")  # Checks if fields is the correct data type
+
+        if len(fields) == 1 and fields[0] == '*':         # '*' Selects the whole record, just like SQL
+            select_all = True
+            pass
+
+        else:
+            for field in fields:                          # Checks if a given field exists in the database
+                if field not in headings_row:
+                    raise Exception("ERROR: fields parameter - Given field does not exist in database")
+
+
+        # ERROR CHECKING - conditions
+        condition_fields = []
+        if conditions != None:                  # Checks if user has given conditions
+            condition_fields = list(conditions)
+
+            if not isinstance(conditions, dict):                                                    # Error checking
+                raise Exception("ERROR: invalid conditions parameter given. Must be a dictionary.")  # Checks if its a dict
+
+            for field in condition_fields:
+                if field not in headings_row:                             # Error checking   # Checks if fields exist in DB
+                    raise Exception("ERROR: conditions parameter - Fields given do not exist in the database.")
+
+
+
+
+
+
+        # ---STARTING SEARCH FOR TARGET RECORDS
         index_positions = [0]
-        for pos in find_index_positions():  # Gets list of index positions of '|', inserting 0 at the start.
+        for pos in self.find_index_positions(
+                headings_row):  # Gets list of index positions of '|', inserting 0 at the start.
             index_positions.append(pos)
 
         field_counter = -1
         lines_to_be_read = []
+        #print(condition_fields)#############
         for field in condition_fields:
             field_counter += 1
             field_index_pos = headings_row.index(field)
@@ -302,23 +319,186 @@ class DKBase:
                     lines_to_be_read.append(line_index_counter)
                     # print(line)
 
-        # print("Lines to be read:", lines_to_be_read)
-        # lines_to_be_read = list(set(lines_to_be_read))  # Removes any duplicates from list
-        # print("Lines to be read:", lines_to_be_read)
+        lines_to_be_read = list(set(lines_to_be_read))  # Removes any duplicates from list
+        #print("target record indexes:", lines_to_be_read)
 
-        for pos in lines_to_be_read:
-            print(file_lines[pos])
+        target_records = []                       # List containing the whole target records, not the index
 
-        # NOT FINISHED - CANNOT VIEW THE WHOLE TABLE
+        if conditions == None:  # Includes all records if user has not given any conditions
+            target_records = file_lines[1:]
+        else:
+            for line_index in lines_to_be_read:
+                target_records.append(file_lines[line_index])
+                #print(file_lines[line_index])
+
+
+        no_of_records = len(target_records)
+        records_table = []                        # Creates a table. Each row is a record that meets the condition.
+
+        for i in range(0, no_of_records):         # Each row will contain the target data that the user wanted.
+            records_table.append([])
+
+
+
+
+
+
+
+
+
+
+
+        # --- GETTING INDIVIDUAL DATA
+        field_counter = -1
+
+        if select_all:                         # If user wanted the whole record/ all data
+
+            headings_list = []
+            count = -1
+                                                         #THIS PART ONLY GETS THE FIELD TITLES
+            for pos in index_positions:                  #CAN BE MADE INTO A FUNCTION?
+                if pos != index_positions[len(index_positions)-1]:
+                    count += 1
+                    forward_count = count + 1
+
+                    start_pos = index_positions[count]
+                    end_pos = index_positions[forward_count]
+
+                    heading = headings_row[start_pos:end_pos]
+
+                    if start_pos == 0:
+                        stripped_heading = heading.strip()
+                    else:  # Gets heading from text file, removes whitespace.
+                        heading = heading[1:]  # Just gets the heading
+                        stripped_heading = heading.strip()
+
+                    #print(stripped_heading)
+                    headings_list.append(stripped_heading)
+
+            #print(headings_list)
+
+
+
+
+            for field in headings_list: #HEADINGS ROW IS THE WHOLE RECORD, NOT A LIST OF HEADING TITLES
+                field_counter += 1
+                field_index_pos = headings_row.index(field)
+
+                if field_index_pos == 0:
+                    column_start_pos = 0  # Gets index positions of '|' for the first column/field
+                    column_end_pos = index_positions[1]
+                else:  # VVV   SEE NOTES FOR VISUAL AND BETTER EXPLANATION   VVV
+                    index_positions_for_search = []
+                    for i in index_positions:  # Makes temporary list of index positions to insert the index
+                        index_positions_for_search.append(i)  # pos of the field.
+
+                    index_positions_for_search.append(field_index_pos)  # Sorts it, putting field pos between the index
+                    index_positions_for_search.sort()  # positions of the starting '|' and the ending '|'.
+
+                    field_index_pos_for_search = index_positions_for_search.index(field_index_pos)
+
+                    column_start_pos = index_positions[field_index_pos_for_search - 1]  # Gives us index positions of '|'
+                    column_end_pos = index_positions[field_index_pos_for_search]  # for the field/column
+
+                #print("Start pos:", column_start_pos)
+                #print("End pos:", column_end_pos)
+                #print("---------------- ")
+
+                record_index_count = -1  # Tracks index of what record data should be added to.
+                for line in target_records:
+                    record_index_count += 1
+                    data = line[column_start_pos:column_end_pos]
+                    #print("data: ", data)
+
+                    if column_start_pos == 0:
+                        stripped_data = data.strip()
+                    else:  # Gets data from text file, removes whitespace.
+                        data = data[1:]  # Just gets the data
+                        stripped_data = data.strip()
+
+                    # print(stripped_data)
+                    records_table[record_index_count].append(stripped_data)
+
+                    if record_index_count == no_of_records - 1:
+                        record_index_count = -1
+
+                # print("---------------- ")
+
+
+
+        else:                                   # Doesnt get whole record. Only gets what user asks for
+            for field in fields:
+                field_counter += 1
+                field_index_pos = headings_row.index(field)
+
+                if field_index_pos == 0:
+                    column_start_pos = 0  # Gets index positions of '|' for the first column/field
+                    column_end_pos = index_positions[1]
+                else:  # VVV   SEE NOTES FOR VISUAL AND BETTER EXPLANATION   VVV
+                    index_positions_for_search = []
+                    for i in index_positions:  # Makes temporary list of index positions to insert the index
+                        index_positions_for_search.append(i)  # pos of the field.
+
+                    index_positions_for_search.append(field_index_pos)  # Sorts it, putting field pos between the index
+                    index_positions_for_search.sort()  # positions of the starting '|' and the ending '|'.
+
+                    field_index_pos_for_search = index_positions_for_search.index(field_index_pos)
+
+                    column_start_pos = index_positions[field_index_pos_for_search - 1]  # Gives us index positions of '|'
+                    column_end_pos = index_positions[field_index_pos_for_search]  # for the field/column
+
+
+                #print("Start pos:", column_start_pos)
+                #print("End pos:", column_end_pos)
+                #print("---------------- ")
+
+
+
+                record_index_count = -1                  # Tracks index of what record data should be added to.
+                for line in target_records:
+                    record_index_count += 1
+                    data = line[column_start_pos:column_end_pos]
+                    #print("data: ", data)
+
+                    if column_start_pos == 0:
+                        stripped_data = data.strip()
+                    else:                                         # Gets data from text file, removes whitespace.
+                        data = data[1:]                           # Just gets the data
+                        stripped_data = data.strip()
+
+                    #print(stripped_data)
+                    records_table[record_index_count].append(stripped_data)
+
+                    if record_index_count == no_of_records - 1:
+                        record_index_count = -1
+
+                #print("---------------- ")
+
+
+        for record in records_table:
+            print(record)
+
+
 
 
 # TESTS --------------------------------
 
-database = DKBase('bookings - Copy.txt')
+database = DKBase('bookings - Copy (2).txt')
 database.open()
 
-database.del_records(
-    {'Name': 'Mia'}
-)
+database.get(
+    ('*',)
+        )
+
+#database.get(
+#    ('BookingsID', 'Time', 'Seating'),
+#    {'Name': 'Pierre'}
+#            )
+
+
+#database.del_records(
+#    {'Name': 'Mia',
+#     'Number of people': '3'}
+#)
 
 # TESTS --------------------------------
