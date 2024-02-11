@@ -54,10 +54,12 @@ Fields must be entered in the same order as how the database has ordered fields.
 
 ## DELETING RECORDS
 >db_variable.del_records(
+>	{field: data},
 >	{field: data}
 >		)
 
 _del_records() will take a single dictionary only.
 The dictionary will take a fieldname and then an item of data.
+There can be many key/value pairs (or conditions) to check for.
 The function will search through the field column and compare with the given data.
 it will then delete the record if the data matches._
