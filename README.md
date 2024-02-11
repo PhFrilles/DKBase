@@ -35,8 +35,29 @@ field length must be an integer._
 ## OPENING AN EXISTING DATABASE
 >db_variable = DKBase('file_name.txt')
 >
->db_variable.open()<
-
+>db_variable.open()
 
 
 _Before making changes to a database e.g. inserting/deleting a record, you must use the .open() function._
+
+## ADDING RECORDS
+>db_variable.add_records(
+>	(ID, field1, field2, ...),
+>	(ID, field1, field2, ...)
+>		)
+
+_add_records() will take a single record or a list of records containing information about a specifc entry.
+Records must be a tuple.
+A record msut have the same amount of fields the database has.
+For each record, fields must be entered with the correct datatype.
+Fields must be entered in the same order as how the database has ordered fields._
+
+## DELETING RECORDS
+>db_variable.del_records(
+>	{field: data}
+>		)
+
+_del_records() will take a single dictionary only.
+The dictionary will take a fieldname and then an item of data.
+The function will search through the field column and compare with the given data.
+it will then delete the record if the data matches._
