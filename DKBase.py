@@ -226,7 +226,7 @@ class DKBase:
 
 
     # ------------------------------------------------------------------------
-    def get(self, fields, conditions):
+    def get(self, fields, conditions=None):
         headings_row = ""
         select_all = False
 
@@ -250,14 +250,16 @@ class DKBase:
 
 
         # ERROR CHECKING - conditions
-        condition_fields = list(conditions)
+        condition_fields = []
+        if conditions != None:                  # Checks if user has given conditions
+            condition_fields = list(conditions)
 
-        if not isinstance(conditions, dict):                                                    # Error checking
-            raise Exception("ERROR: invalid conditions parameter given. Must be a dictionary.")  # Checks if its a dict
+            if not isinstance(conditions, dict):                                                    # Error checking
+                raise Exception("ERROR: invalid conditions parameter given. Must be a dictionary.")  # Checks if its a dict
 
-        for field in condition_fields:
-            if field not in headings_row:                             # Error checking   # Checks if fields exist in DB
-                raise Exception("ERROR: conditions parameter - Fields given do not exist in the database.")
+            for field in condition_fields:
+                if field not in headings_row:                             # Error checking   # Checks if fields exist in DB
+                    raise Exception("ERROR: conditions parameter - Fields given do not exist in the database.")
 
 
 
@@ -272,6 +274,7 @@ class DKBase:
 
         field_counter = -1
         lines_to_be_read = []
+        #print(condition_fields)#############
         for field in condition_fields:
             field_counter += 1
             field_index_pos = headings_row.index(field)
@@ -320,9 +323,13 @@ class DKBase:
         #print("target record indexes:", lines_to_be_read)
 
         target_records = []                       # List containing the whole target records, not the index
-        for line_index in lines_to_be_read:
-            target_records.append(file_lines[line_index])
-            #print(file_lines[line_index])
+
+        if conditions == None:  # Includes all records if user has not given any conditions
+            target_records = file_lines[1:]
+        else:
+            for line_index in lines_to_be_read:
+                target_records.append(file_lines[line_index])
+                #print(file_lines[line_index])
 
 
         no_of_records = len(target_records)
@@ -480,8 +487,7 @@ database = DKBase('bookings - Copy (2).txt')
 database.open()
 
 database.get(
-    ('*',),
-    {'Seating': 'Outdoor'}
+    ('*',)
         )
 
 #database.get(
