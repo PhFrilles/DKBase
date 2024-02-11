@@ -63,3 +63,17 @@ The dictionary will take a fieldname and then an item of data.
 There can be many key/value pairs (or conditions) to check for.
 The function will search through the field column and compare with the given data.
 it will then delete the record if the data matches._
+
+## SELECTING DATA
+>db_variable.get(
+>	(fields,),
+>	{field: data, ...}
+>		)
+
+_.get() takes two parameters: fields and condition.
+fields must be a tuple. It takes the field names that the user wants. Fields must exist in database.
+fields can also take '*' as a single item tuple. Like SQL, this will select all fields.
+Within condition dictionary, field is the field that the user wants to compare against.
+Data is an item of data that will be compared to all items within the given field.
+condition dictionary is optional and not needed.
+Only use condition dictionary if looking for a record with specific data_
