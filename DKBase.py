@@ -221,6 +221,10 @@ class DKBase:
 
 
 
+
+
+
+
     # ------------------------------------------------------------------------
     def get(self, fields, conditions):
         headings_row = ""
@@ -320,6 +324,7 @@ class DKBase:
             target_records.append(file_lines[line_index])
             #print(file_lines[line_index])
 
+
         no_of_records = len(target_records)
         records_table = []                        # Creates a table. Each row is a record that meets the condition.
 
@@ -330,11 +335,45 @@ class DKBase:
 
 
 
+
+
+
+
+
+
         # --- GETTING INDIVIDUAL DATA
         field_counter = -1
 
         if select_all:                         # If user wanted the whole record/ all data
-            for field in headings_row:
+
+            headings_list = []
+            count = -1
+                                                         #THIS PART ONLY GETS THE FIELD TITLES
+            for pos in index_positions:                  #CAN BE MADE INTO A FUNCTION?
+                if pos != index_positions[len(index_positions)-1]:
+                    count += 1
+                    forward_count = count + 1
+
+                    start_pos = index_positions[count]
+                    end_pos = index_positions[forward_count]
+
+                    heading = headings_row[start_pos:end_pos]
+
+                    if start_pos == 0:
+                        stripped_heading = heading.strip()
+                    else:  # Gets heading from text file, removes whitespace.
+                        heading = heading[1:]  # Just gets the heading
+                        stripped_heading = heading.strip()
+
+                    #print(stripped_heading)
+                    headings_list.append(stripped_heading)
+
+            #print(headings_list)
+
+
+
+
+            for field in headings_list: #HEADINGS ROW IS THE WHOLE RECORD, NOT A LIST OF HEADING TITLES
                 field_counter += 1
                 field_index_pos = headings_row.index(field)
 
@@ -351,19 +390,18 @@ class DKBase:
 
                     field_index_pos_for_search = index_positions_for_search.index(field_index_pos)
 
-                    column_start_pos = index_positions[
-                        field_index_pos_for_search - 1]  # Gives us index positions of '|'
+                    column_start_pos = index_positions[field_index_pos_for_search - 1]  # Gives us index positions of '|'
                     column_end_pos = index_positions[field_index_pos_for_search]  # for the field/column
 
-                # print("Start pos:", column_start_pos)
-                # print("End pos:", column_end_pos)
-                # print("---------------- ")
+                #print("Start pos:", column_start_pos)
+                #print("End pos:", column_end_pos)
+                #print("---------------- ")
 
                 record_index_count = -1  # Tracks index of what record data should be added to.
                 for line in target_records:
                     record_index_count += 1
                     data = line[column_start_pos:column_end_pos]
-                    # print("data: ", data)
+                    #print("data: ", data)
 
                     if column_start_pos == 0:
                         stripped_data = data.strip()
@@ -442,9 +480,15 @@ database = DKBase('bookings - Copy (2).txt')
 database.open()
 
 database.get(
-    ('BookingsID',),
-    {'Name': 'Pierre'}
-            )
+    ('*',),
+    {'Seating': 'Outdoor'}
+        )
+
+#database.get(
+#    ('BookingsID', 'Time', 'Seating'),
+#    {'Name': 'Pierre'}
+#            )
+
 
 #database.del_records(
 #    {'Name': 'Mia',
