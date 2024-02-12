@@ -237,7 +237,7 @@ class DKBase:
 
         # ERROR CHECKING - fields - MUST BE A TUPLE, EVEN A SINGLE ITEM TUPLE
         if not isinstance(fields, tuple):
-            raise Exception("ERROR: Given fields must be a dictionary")  # Checks if fields is the correct data type
+            raise Exception("ERROR: Given fields must be a tuple")  # Checks if fields is the correct data type
 
         if len(fields) == 1 and fields[0] == '*':         # '*' Selects the whole record, just like SQL
             select_all = True
@@ -274,7 +274,7 @@ class DKBase:
 
         field_counter = -1
         lines_to_be_read = []
-        #print(condition_fields)#############
+
         for field in condition_fields:
             field_counter += 1
             field_index_pos = headings_row.index(field)
@@ -330,6 +330,7 @@ class DKBase:
             for line_index in lines_to_be_read:
                 target_records.append(file_lines[line_index])
                 #print(file_lines[line_index])
+
 
 
         no_of_records = len(target_records)
@@ -481,24 +482,197 @@ class DKBase:
 
 
 
+
+
+
+
+
+
+
+    # ------------------------------------------------------------------------
+    def update(self, fields, conditions):
+        headings_row = ""
+
+        with open(self.file_name, 'r') as file:  # Gets headings row of DB for format checks e.g. fields given.
+            file_lines = file.readlines()
+            headings_row = file_lines[0]
+
+
+        # ERROR CHECKING - fields - MUST BE A DICTIONARY
+        if not isinstance(fields, dict):
+            raise Exception("ERROR: fields parameter must be a dictionary")  # Checks if fields is the correct data type
+
+        else:
+            for field in fields:                          # Checks if a given field exists in the database
+                if field not in headings_row:
+                    raise Exception("ERROR: fields parameter - Given field does not exist in database")
+
+
+        # ERROR CHECKING - conditions
+        condition_fields = []
+        condition_fields = list(conditions)
+        if not isinstance(conditions, dict):
+            raise Exception("ERROR: invalid conditions parameter given. Must be a dictionary.")  # Checks if its a dict
+
+        if len(conditions) < 1:    # Checks only one condition given
+            raise Exception("ERROR: conditions parameter - No condition given. Function requires one condition.")
+        elif len(conditions) > 1:
+            raise Exception("ERROR: conditions parameter - More than one condition given. Function requires one condition.")
+
+        for field in condition_fields:
+            if field not in headings_row:
+                raise Exception("ERROR: conditions parameter - Fields given do not exist in the database.")
+
+
+
+        # ---STARTING SEARCH FOR TARGET RECORDS
+        index_positions = [0]
+        for pos in self.find_index_positions(
+                headings_row):  # Gets list of index positions of '|', inserting 0 at the start.
+            index_positions.append(pos)
+
+        field_counter = -1
+        lines_to_be_read = []
+        #print(condition_fields)#############
+        for field in condition_fields:
+            field_counter += 1
+            field_index_pos = headings_row.index(field)
+
+            if field_index_pos == 0:
+                column_start_pos = 0  # Gets index positions of '|' for the first column/field
+                column_end_pos = index_positions[1]
+            else:  # VVV   SEE NOTES FOR VISUAL AND BETTER EXPLANATION   VVV
+                index_positions_for_search = []
+                for i in index_positions:  # Makes temporary list of index positions to insert the index
+                    index_positions_for_search.append(i)  # pos of the field.
+
+                index_positions_for_search.append(field_index_pos)  # Sorts it, putting field pos between the index
+                index_positions_for_search.sort()  # positions of the starting '|' and the ending '|'.
+
+                field_index_pos_for_search = index_positions_for_search.index(field_index_pos)
+
+                column_start_pos = index_positions[field_index_pos_for_search - 1]  # Gives us index positions of '|'
+                column_end_pos = index_positions[field_index_pos_for_search]  # for the field/column
+
+            # print("Start pos:", column_start_pos)
+            # print("End pos:", column_end_pos)
+            # print(" ")
+
+            line_index_counter = -1
+            for line in file_lines:
+                line_index_counter += 1
+                data = line[column_start_pos:column_end_pos]
+                current_field = condition_fields[field_counter]
+                condition = str(conditions[current_field])
+                #print("Condition:", condition)
+
+                if column_start_pos == 0:
+                    stripped_data = data.strip()
+                else:  # Gets data from text file, removes whitespace.
+                    data = data[1:]  # Just gets the data
+                    stripped_data = data.strip()
+
+                #print("Stripped data:", stripped_data)
+
+                if condition == stripped_data:
+                    lines_to_be_read.append(line_index_counter)
+                    # print(line)
+
+        lines_to_be_read = list(set(lines_to_be_read))  # Removes any duplicates from list
+        target_record_indexes = lines_to_be_read        ##   USE THIS TO OVERWRITE THE ORIGINAL TXT FILE
+        #print("target record indexes:", lines_to_be_read)
+
+        target_records = []  # List containing the whole target records, not the index
+
+        for line_index in lines_to_be_read:
+            target_records.append(file_lines[line_index])
+            #print(file_lines[line_index])
+
+
+
+
+
+        # ---UPDATING DATABASE
+        fields_list = list(fields)
+
+        #print(fields_list)
+        #print(index_positions)
+        #print("-------------------")
+
+        field_counter = -1
+
+        for record in target_records:  # Iterates through records that need updating
+            print("old record:", record)
+            new_record = record
+
+            for field in fields_list:
+                new_data = fields[field]
+                #print("new_data:", new_data)
+
+                field_counter += 1
+                field_index_pos = headings_row.index(field)
+
+                if field_index_pos == 0:
+                    column_start_pos = 0  # Gets index positions of '|' for the first column/field
+                    column_end_pos = index_positions[1]
+                else:  # VVV   SEE NOTES FOR VISUAL AND BETTER EXPLANATION   VVV
+                    index_positions_for_search = []
+                    for i in index_positions:  # Makes temporary list of index positions to insert the index
+                        index_positions_for_search.append(i)  # pos of the field.
+
+                    index_positions_for_search.append(field_index_pos)  # Sorts it, putting field pos between the index
+                    index_positions_for_search.sort()  # positions of the starting '|' and the ending '|'.
+
+                    field_index_pos_for_search = index_positions_for_search.index(field_index_pos)
+
+                    column_start_pos = index_positions[field_index_pos_for_search - 1]  # Gives us index positions of '|'
+                    column_end_pos = index_positions[field_index_pos_for_search]  # for the field/column
+
+                    # print("Start pos:", column_start_pos)
+                    # print("End pos:", column_end_pos)
+                    # print(" ")
+
+
+
+
+                    # UPDATED DATA ERROR CHECKING - CHECK IF IT EXCEEDS LENGTH
+                    field_length = column_end_pos - column_start_pos - 1   # -1 needs testing. test max of field length?
+                    #print(field_length)
+
+                    if len(new_data) > field_length:
+                        raise Exception("ERROR: fields parameter - One or more New values exceeds field length")
+
+                    # +1 doesnt include/replace line separator
+                    formatted_new_data = new_data.center(field_length)
+                    new_record = new_record.replace(record[column_start_pos+1:column_end_pos], formatted_new_data)
+                    #print(new_record)
+
+            print("new record:", new_record)
+
+
+
+            print("-------------------")
+
+
+
+#   KEEP TESTING THIS PART BEFORE OVERWRITING THE TXT FILE
+
+
+
+
 # TESTS --------------------------------
 
 database = DKBase('bookings - Copy (2).txt')
 database.open()
 
-database.get(
-    ('*',)
-        )
+database.update(
+    {'Name': 'Ivan',
+     'Seating': 'Indoor',
+     'Number of people': '2'},
+    {'Seating': 'Outdoor'}
+)
 
-#database.get(
-#    ('BookingsID', 'Time', 'Seating'),
-#    {'Name': 'Pierre'}
-#            )
-
-
-#database.del_records(
-#    {'Name': 'Mia',
-#     'Number of people': '3'}
-#)
+# Requirements/Limitations: fields and conditions dictionary is mandatory. Conditions dictionary MUST only have one
+#                           key/value pair.
 
 # TESTS --------------------------------
