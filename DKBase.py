@@ -533,7 +533,7 @@ class DKBase:
 
         field_counter = -1
         lines_to_be_read = []
-        #print(condition_fields)#############
+        
         for field in condition_fields:
             field_counter += 1
             field_index_pos = headings_row.index(field)
@@ -579,7 +579,7 @@ class DKBase:
                     # print(line)
 
         lines_to_be_read = list(set(lines_to_be_read))  # Removes any duplicates from list
-        target_record_indexes = lines_to_be_read        ##   USE THIS TO OVERWRITE THE ORIGINAL TXT FILE
+        target_record_indexes = lines_to_be_read        
         #print("target record indexes:", lines_to_be_read)
 
         target_records = []  # List containing the whole target records, not the index
@@ -600,10 +600,12 @@ class DKBase:
         #print("-------------------")
 
         field_counter = -1
+        index_change_counter = -1
 
         for record in target_records:  # Iterates through records that need updating
-            print("old record:", record)
+            #print("OLD record:", record)
             new_record = record
+            index_change_counter += 1
 
             for field in fields_list:
                 new_data = fields[field]
@@ -628,49 +630,58 @@ class DKBase:
                     column_start_pos = index_positions[field_index_pos_for_search - 1]  # Gives us index positions of '|'
                     column_end_pos = index_positions[field_index_pos_for_search]  # for the field/column
 
-                    # print("Start pos:", column_start_pos)
-                    # print("End pos:", column_end_pos)
-                    # print(" ")
+                #print("Start pos:", column_start_pos)
+                #print("End pos:", column_end_pos)
+                #print(" ")
 
 
 
 
-                    # UPDATED DATA ERROR CHECKING - CHECK IF IT EXCEEDS LENGTH
-                    field_length = column_end_pos - column_start_pos - 1   # -1 needs testing. test max of field length?
-                    #print(field_length)
+                # UPDATED DATA ERROR CHECKING - CHECK IF IT EXCEEDS LENGTH
+                field_length = column_end_pos - column_start_pos - 1   # -1 needs testing. test max of field length?
+                #print("Field length:", field_length)
 
-                    if len(new_data) > field_length:
-                        raise Exception("ERROR: fields parameter - One or more New values exceeds field length")
+                if len(new_data) > field_length:
+                    raise Exception("ERROR: fields parameter - One or more New values exceeds field length")
 
-                    # +1 doesnt include/replace line separator
-                    formatted_new_data = new_data.center(field_length)
-                    new_record = new_record.replace(record[column_start_pos+1:column_end_pos], formatted_new_data)
-                    #print(new_record)
+                # +1 doesnt include/replace line separator
+                formatted_new_data = new_data.center(field_length)
+                #print("formatted new data:", formatted_new_data)
+                #print("replacing >>:", new_record[column_start_pos+1:column_end_pos])
+                new_record = new_record.replace(record[column_start_pos+1:column_end_pos], formatted_new_data, 1) # Replaces only first occurence.
+                #print(new_record)                                                                         # useful when there is duplicates in multiple fields e.g  x |     x  |x|x|       x        |
 
-            print("new record:", new_record)
+            #print("NEW record:", new_record)
+            #print("-------------------")
+
+            #print("target_record_indexes: ", target_record_indexes)
+            #print("index change counter:", index_change_counter)
+            current_index_to_change = target_record_indexes[index_change_counter]
+            file_lines[current_index_to_change] = new_record
+            # Gets file_lines list, replaces old records with new records.
+
+        #for line in file_lines:
+            #print(line)
+
+        with open(self.file_name, 'w') as file:
+            for line in file_lines:                           # Overwrites file with the changes made.
+                file.write(line)
 
 
-
-            print("-------------------")
-
-
-
-#   KEEP TESTING THIS PART BEFORE OVERWRITING THE TXT FILE
 
 
 
 
 # TESTS --------------------------------
 
-database = DKBase('bookings - Copy (2).txt')
+database = DKBase('bookings - Copy (4).txt')
 database.open()
 
 database.update(
-    {'Name': 'Ivan',
-     'Seating': 'Indoor',
-     'Number of people': '2'},
-    {'Seating': 'Outdoor'}
+    {'Occasion': 'Celebration'},
+    {'Name': 'Philip'}
 )
+
 
 # Requirements/Limitations: fields and conditions dictionary is mandatory. Conditions dictionary MUST only have one
 #                           key/value pair.
