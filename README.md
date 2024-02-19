@@ -1,5 +1,5 @@
 # DKBase - txt file database manager README <<
-### Last updated: 17/02/2024
+### Last updated: 19/02/2024
 
 ## OVERVIEW 
 DKBase is a database manager revolving around text files.
@@ -8,9 +8,10 @@ to be used in python programs.
 
 ## CURRENT FEATURES:
 
-Create a new database, Add records, Delete records, Selecting data
+Create a new database, Add records, Delete records, Select data, Update data
 
 ## SETTING UP
+Ensure that the correct file path is given at the top of the program.
 Before making any changes to a database, you must correctly setup a database.
 When setting up a database you can either setup to create a new database or
 setup to view or edit a database.
