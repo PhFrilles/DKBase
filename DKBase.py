@@ -1,6 +1,3 @@
-# DeeKie Base Manager (Data base manager)
-# - Started 28 October 2023
-# -------------------------------------------
 import os
 
 os.chdir('D:\\Desktop\\python_folder\\Year 13 - NEA stuff\\database_manager\\databases')
@@ -672,18 +669,6 @@ class DKBase:
 
 
 
-# TESTS --------------------------------
-
-database = DKBase('bookings - Copy (4).txt')
-database.open()
-
-database.update(
-    {'Occasion': 'Celebration'},
-    {'Name': 'Philip'}
-)
-
 
 # Requirements/Limitations: fields and conditions dictionary is mandatory. Conditions dictionary MUST only have one
 #                           key/value pair.
-
-# TESTS --------------------------------
