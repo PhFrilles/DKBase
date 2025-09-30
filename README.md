@@ -1,10 +1,10 @@
-# DKBase - txt file database manager README <<
-### Last updated: 19/02/2024
+# DKBase - text file data handler README <<
+### Last updated: 30/09/2025
 
 ## OVERVIEW 
-DKBase is a database manager revolving around text files.
-It can be used to handle multiple databases and is designed 
-to be used in python programs.
+DKBase is a text file data handler built in python.
+It can be used to handle textfiles that act as databases and is designed 
+to be implemented within other python programs.
 
 ## CURRENT FEATURES:
 
